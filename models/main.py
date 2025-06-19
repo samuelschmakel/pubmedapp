@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract")
-model = AutoModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract")
+tokenizer = AutoTokenizer.from_pretrained("microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext")
+model = AutoModel.from_pretrained("microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext")
 print(f"Are tokenizer and model the same?: {tokenizer == model}")
 
 # Sample abstracts

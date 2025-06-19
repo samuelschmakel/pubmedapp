@@ -6,6 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract")
 model = AutoModel.from_pretrained("microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract")
+print(f"Are tokenizer and model the same?: {tokenizer == model}")
 
 # Sample abstracts
 abstracts = [
@@ -26,8 +27,9 @@ def get_embeddings(text_list):
             embeddings.append(mean_embedding.numpy())
     return np.array(embeddings)
 
-# Generate embeddings
+# Generate embeddings from computed embeddings
 embeddings = get_embeddings(abstracts)
+print(f"embeddings returned from function: {embeddings}")
 
 # Cosine similarity matrix
 similarities = cosine_similarity(embeddings)

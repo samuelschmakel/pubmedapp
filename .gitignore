@@ -1,1 +1,5 @@
 venv/
+backend/*.exe
+backend/*.out
+backend/*.test
+backend/backend

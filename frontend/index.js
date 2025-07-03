@@ -1,24 +1,30 @@
-const button = document.querySelector('.submit-button');
+const form = document.getElementById('myForm');
 
 function init() {
-    button.addEventListener("click", handleClick);
+    form.addEventListener('submit', handleClick);
 }
 
-function handleClick(e) {
+async function handleClick(e) {
     console.log(`This event: ${e} happened.`);
-    fetch('http://localhost:8080/api/data', {
+    e.preventDefault(); // Prevent page reload
+    
+    const formData = new FormData(e.target);
+    for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+    const params = new URLSearchParams(formData);
+    console.log(`params: ${params}`)
+
+    let url = `http://localhost:8080/api/data?${params.toString()}`
+
+    console.log(`url sent to backend: ${url}`)
+
+    const response = await fetch(url, {
         method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data.message); // do something with the data
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-        })
+
+    const result = await response.json();
+    console.log(`Here is the result.message: ${result.message}`);
 }
 
 init();

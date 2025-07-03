@@ -17,12 +17,14 @@
         <p>Created by Dr. Chiquito Crasto and Sam Schmakel</p>
     </header>
 
-    <label>Search:</label>
-    <input type="text" class="search-input"><br><br>
-    <label>Context:</label>
-    <input type="text" class="context-input"><br><br>
+    <form id="myForm">
+        <label for="query">Search:</label>
+        <input name="query" id="query"><br><br>
+        <label for="context">Context:</label>
+        <input name="context" id="context"><br><br>
+        <button type="submit">Submit</button>
+    </form>
 
-    <button class="submit-button">Submit</button>
     <script src="./index.js"></script>
 </body>
 

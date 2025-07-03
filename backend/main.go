@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"net/http"
 	"sync/atomic"
+
+	"github.com/samuelschmakel/pubmedapp/backend/config"
+	"github.com/samuelschmakel/pubmedapp/backend/handlers"
 )
 
-type apiconfig struct {
-    fileserverHits atomic.Int32
-    platform string
-    secretkey string
-}
+func main() {   
+    cfg := &config.ApiConfig{
+        FileserverHits: atomic.Int32{},
+    }
 
-func main() {
-    http.HandleFunc("/api/data", handleData)
+    h := handlers.NewHandler(cfg)
+
+    http.HandleFunc("/api/data", h.HandleSubmit)
 
     // Run server on port 8080
     fmt.Println("Starting server on port 8080...")
@@ -21,37 +24,4 @@ func main() {
     if err != nil {
         panic(err)
     }
-
-    /*
-    const filepathRoot = "."
-    port := os.Getenv("PORT")
-    fmt.Printf("port: %s", port)
-
-    godotenv.Load()
-    dbURL := os.Getenv("DB_URL")
-    if dbURL == "" {
-        log.Fatal("PLATFORM must be set")
-    }
-
-    mux := http.NewServeMux()
-
-    mux.Handle("GET /api/test", handlerPass)
-    */
-}
-
-func handleData(w http.ResponseWriter, r *http.Request) {
-
-    // CORS headers
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-    if r.Method == "OPTIONS" {
-        // Stop here for preflight requests
-        w.WriteHeader(http.StatusOK)
-        return
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    fmt.Fprint(w, `{"message": "Handling data, hello from Go backend!"}`)
 }

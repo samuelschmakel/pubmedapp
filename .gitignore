@@ -3,3 +3,4 @@ backend/*.exe
 backend/*.out
 backend/*.test
 backend/backend
+.env

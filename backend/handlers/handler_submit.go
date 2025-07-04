@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"strings"
 
 	"github.com/samuelschmakel/pubmedapp/backend/config"
 	"github.com/samuelschmakel/pubmedapp/backend/processing"
@@ -10,6 +13,12 @@ import (
 
 type Handler struct {
 	Cfg *config.ApiConfig
+}
+
+type ArticleInfo struct {
+	Title string `json:"title"`
+	Abstract string `json:"abstract"`
+	URL string `json:"url"`
 }
 
 func NewHandler(cfg *config.ApiConfig) *Handler {
@@ -40,23 +49,43 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
 	}
 
     fmt.Printf("query: %s, context: %s\n", query, context)
-	eSearchResult, err := processing.FetchPapers()
+
+	eSearchResult, err := processing.FetchESearchResult(h.Cfg.HttpClient)
 	if err != nil {
-		fmt.Printf("error returned from FetchPapers(): %s", error.Error(err))
-		http.Error(w, "Error retrieving query results from Pubmed", http.StatusInternalServerError)
+		http.Error(w, "Error retrieving query UIDs from PubMed: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 
-	IDlist := eSearchResult.ESearchResult.IDlist
-	if len(IDlist) == 0 {
-		http.Error(w, "No articles found for that query", http.StatusBadRequest)
+	articleSet, err := processing.FetchEFetchResult(h.Cfg.HttpClient, eSearchResult.ESearchResult.IDlist)
+	if err != nil {
+		http.Error(w, "Error retreiving abstracts from UIDs: "+err.Error(), http.StatusBadGateway)
+	}
+
+	if articleSet == nil {
+		fmt.Println("the result from efetch was nil")
 		return
 	}
 
-	for _, v := range IDlist {
-		fmt.Printf("ID: %s\n", v)
+	var articles []ArticleInfo
+
+	for _, a := range articleSet.PubmedArticles {
+		pmid := a.MedlineCitation.PMID
+		title := a.MedlineCitation.Article.ArticleTitle
+		abstract := strings.Join(a.MedlineCitation.Article.Abstract.AbstractText, " ")
+		url := fmt.Sprintf("https://pubmed.ncbi.nlm.nih.gov/%s/", pmid)
+	
+		articles = append(articles, ArticleInfo{
+			Title:    title,
+			Abstract: abstract,
+			URL:      url,
+		})
 	}
 
     w.Header().Set("Content-Type", "application/json")
-    fmt.Fprint(w, `{"message": "Handling data, hello from Go backend!"}`)
+	err = json.NewEncoder(w).Encode(articles)
+	if err != nil {
+		http.Error(w, "Failed to encode articles", http.StatusInternalServerError)
+		return
+	}
+    //fmt.Fprint(w, `{"message": "Handling data, hello from Go backend!"}`)
 }

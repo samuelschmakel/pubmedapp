@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"sync/atomic"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/samuelschmakel/pubmedapp/backend/config"
@@ -18,6 +19,9 @@ func main() {
     }
     cfg := &config.ApiConfig{
         FileserverHits: atomic.Int32{},
+        HttpClient: &http.Client{
+            Timeout: 10 * time.Second,
+        },
     }
 
     h := handlers.NewHandler(cfg)

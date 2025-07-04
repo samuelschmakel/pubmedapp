@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 )
 
 	
@@ -33,10 +35,16 @@ type PubmedArticle struct {
     } `xml:"MedlineCitation"`
 }
 
-func FetchESearchResult(client *http.Client) (*ESearchResult, error) {
+func FetchESearchResult(client *http.Client, query string) (*ESearchResult, error) {
 	url := os.Getenv("ESEARCH_URL")
+
+	// Compiles regex to match one or more whitespace characters
+	re := regexp.MustCompile(`\s+`)
+	// Replaces all whitespace with "+" and starts the string with "&"
+	cleaned := "&term=" + re.ReplaceAllString(strings.TrimSpace(query), "+")
 	// Change to make this not hardcoded
-	url += "&term=cancer+immunotherapy&retmax=2&retmode=json&email=samuel.schmakel@gmail.com"
+	url += cleaned + "&retmax=2&retmode=json&email=samuel.schmakel@gmail.com"
+	//url += "&term=cancer+immunotherapy&retmax=2&retmode=json&email=samuel.schmakel@gmail.com"
 
 	resp, err := client.Get(url)
 	if err != nil {
@@ -61,10 +69,14 @@ func FetchESearchResult(client *http.Client) (*ESearchResult, error) {
 	return &result, nil
 }
 
-func FetchEFetchResult(client *http.Client, ids []string) (*PubMedArticleSet, error) {
+func FetchEFetchResult(client *http.Client, idSlice []string) (*PubMedArticleSet, error) {
 	url := os.Getenv("EFETCH_URL")
 	// Change to make this not hardcoded
-	url += "&id=40601938,40601888&rettype=abstract&retmode=xml&email=samuel.schmakel@gmail.com"
+	ids := "&id=" + strings.Join(idSlice, ",")
+
+	url += ids + "&rettype=abstract&retmode=xml&email=samuel.schmakel@gmail.com"
+	//url += "&id=40601938,40601888&rettype=abstract&retmode=xml&email=samuel.schmakel@gmail.com"
+	fmt.Printf("The url being used: %s", url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

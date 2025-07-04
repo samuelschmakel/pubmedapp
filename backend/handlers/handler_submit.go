@@ -50,10 +50,14 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
 
     fmt.Printf("query: %s, context: %s\n", query, context)
 
-	eSearchResult, err := processing.FetchESearchResult(h.Cfg.HttpClient)
+	eSearchResult, err := processing.FetchESearchResult(h.Cfg.HttpClient, query)
 	if err != nil {
 		http.Error(w, "Error retrieving query UIDs from PubMed: "+err.Error(), http.StatusBadGateway)
 		return
+	}
+
+	for _, v := range eSearchResult.ESearchResult.IDlist {
+		fmt.Printf("ID: %s\n", v)
 	}
 
 	articleSet, err := processing.FetchEFetchResult(h.Cfg.HttpClient, eSearchResult.ESearchResult.IDlist)

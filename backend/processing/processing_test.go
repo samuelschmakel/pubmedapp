@@ -136,7 +136,7 @@ PMID: 40601888
 
 	for i, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			actual, err := fetchAbstracts(tc.inputURL)
+			actual, err := FetchAbstracts(tc.inputURL)
 			if err != nil && !strings.Contains(err.Error(), tc.errorContains) {
 				t.Errorf("Test %v - '%s' FAIL: unexpected error: %v", i, tc.name, err)
 				return

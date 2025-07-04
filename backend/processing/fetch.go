@@ -1,31 +1,52 @@
 package processing
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 )
 
-func queryEntrezAPI() ([]byte, error) {
+	
+type ESearchResult struct {
+	ESearchResult struct {
+		IDlist         []string `json:"idlist"`
+		Error string `json:"ERROR"` // only present when the API errors
+	} `json:"esearchresult"`
+}
+
+func FetchPapers() (*ESearchResult, error) {
+	fmt.Println("running fetchPapers()")
 	url := os.Getenv("ESEARCH_URL")
 	// Change to make this not hardcoded
 	url += "&term=cancer+immunotherapy&retmax=2&retmode=json&email=samuel.schmakel@gmail.com"
+	fmt.Printf("url passed into Get request: %s\n", url)
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	defer res.Body.Close()
 
-	data, err := io.ReadAll(res.Body)
+	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response data: %w", err)
 	}
 
-	return data, nil
+	var result ESearchResult
+	err = json.Unmarshal(bodyBytes, &result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	if result.ESearchResult.Error != "" {
+		return nil, fmt.Errorf("API Error: %s", result.ESearchResult.Error)
+	}
+
+	return &result, nil
 }
 
-func fetchAbstracts(url string) (string, error) {
+func FetchAbstracts(url string) (string, error) {
 	// url := os.Getenv("EFETCH_URL")
 	// Change to make this not hardcoded
 	// url += "&id=40601938, 40601888&rettype=abstract&retmode=text&email=samuel.schmakel@gmail.com"

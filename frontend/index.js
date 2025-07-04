@@ -7,6 +7,14 @@ function init() {
 async function handleClick(e) {
     console.log(`This event: ${e} happened.`);
     e.preventDefault(); // Prevent page reload
+
+    const query = document.getElementById("query");
+
+    // TODO: Make this less hideous than the alert box
+    if (!query.value.trim()) {
+        alert('The query field must not be empty.')
+        return;
+    }
     
     const formData = new FormData(e.target);
     for (const pair of formData.entries()) {

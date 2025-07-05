@@ -78,7 +78,6 @@ func FetchEFetchResult(client *http.Client, idSlice []string) (*PubMedArticleSet
 
 	url += ids + "&rettype=abstract&retmode=xml&email=samuel.schmakel@gmail.com"
 	//url += "&id=40601938,40601888&rettype=abstract&retmode=xml&email=samuel.schmakel@gmail.com"
-	fmt.Printf("The url being used: %s", url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

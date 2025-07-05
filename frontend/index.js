@@ -32,7 +32,26 @@ async function handleClick(e) {
     })
 
     const result = await response.json();
-    console.log(`Here is the result.message: ${result.message}`);
+    result.forEach((paper, index) => {
+        console.log(`Paper ${index+1}:`);
+        console.log(`Title: ${paper.title}`);
+        console.log(`Abstract: ${paper.abstract}`);
+        console.log(`URL: ${paper.url}`);
+    });
+    
+    const container = document.getElementById('papers-container');
+
+    result.forEach((paper) => {
+    const paperElement = document.createElement('div');
+    paperElement.className = 'paper-card';
+    paperElement.innerHTML = `
+        <h3>${paper.title} 
+            <a href="url">${paper.url}</a>
+        </h3>
+        <p><strong>Abstract:</strong> ${paper.abstract}</p>
+    `;
+    container.appendChild(paperElement);
+    });
 }
 
 init();

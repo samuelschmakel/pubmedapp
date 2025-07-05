@@ -35,15 +35,17 @@ type PubmedArticle struct {
     } `xml:"MedlineCitation"`
 }
 
-func FetchESearchResult(client *http.Client, query string) (*ESearchResult, error) {
+func FetchESearchResult(client *http.Client, query, num_articles string) (*ESearchResult, error) {
 	url := os.Getenv("ESEARCH_URL")
 
 	// Compiles regex to match one or more whitespace characters
 	re := regexp.MustCompile(`\s+`)
 	// Replaces all whitespace with "+" and starts the string with "&"
 	cleaned := "&term=" + re.ReplaceAllString(strings.TrimSpace(query), "+")
+
+	cleaned += "&retmax=" + num_articles
 	// Change to make this not hardcoded
-	url += cleaned + "&retmax=2&retmode=json&email=samuel.schmakel@gmail.com"
+	url += cleaned + "&retmode=json&email=samuel.schmakel@gmail.com"
 	//url += "&term=cancer+immunotherapy&retmax=2&retmode=json&email=samuel.schmakel@gmail.com"
 
 	resp, err := client.Get(url)

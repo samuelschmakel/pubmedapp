@@ -41,6 +41,7 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
     // TODO: Use these parameters in helper function to query dataset
     query := req.URL.Query().Get("query")
     context := req.URL.Query().Get("context")
+	numArticles := req.URL.Query().Get("num_articles")
 
 	// Verify that the query exists:
 	if query == "" {
@@ -50,7 +51,7 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
 
     fmt.Printf("query: %s, context: %s\n", query, context)
 
-	eSearchResult, err := processing.FetchESearchResult(h.Cfg.HttpClient, query)
+	eSearchResult, err := processing.FetchESearchResult(h.Cfg.HttpClient, query, numArticles)
 	if err != nil {
 		http.Error(w, "Error retrieving query UIDs from PubMed: "+err.Error(), http.StatusBadGateway)
 		return

@@ -4,6 +4,7 @@ function init() {
     form.addEventListener('submit', handleClick);
 }
 
+// TODO: fix paper url link to go to link on click
 async function handleClick(e) {
     console.log(`This event: ${e} happened.`);
     e.preventDefault(); // Prevent page reload

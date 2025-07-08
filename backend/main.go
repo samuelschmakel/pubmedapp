@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync/atomic"
 	"time"
 
@@ -28,9 +29,14 @@ func main() {
 
     http.HandleFunc("/api/data", h.HandleSubmit)
 
-    // Run server on port 8080
-    fmt.Println("Starting server on port 8080...")
-    err = http.ListenAndServe(":8080", nil)
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8080"
+    }
+
+    // Run server on port (8080 by default)
+    fmt.Printf("Starting server on port %s...\n", port)
+    err = http.ListenAndServe(":"+port, nil)
     if err != nil {
         panic(err)
     }

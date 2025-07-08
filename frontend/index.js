@@ -32,15 +32,9 @@ async function handleClick(e) {
     })
 
     const result = await response.json();
-    result.forEach((paper, index) => {
-        console.log(`Paper ${index+1}:`);
-        console.log(`Title: ${paper.title}`);
-        console.log(`Abstract: ${paper.abstract}`);
-        console.log(`URL: ${paper.url}`);
-    });
-    
     const container = document.getElementById('papers-container');
 
+    container.innerHTML = '';
     result.forEach((paper) => {
     const paperElement = document.createElement('div');
     paperElement.className = 'paper-card';

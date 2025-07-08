@@ -24,7 +24,7 @@ async function handleClick(e) {
     const params = new URLSearchParams(formData);
     console.log(`params: ${params}`)
 
-    let url = `http://localhost:8080/api/data?${params.toString()}`
+    let url = `/api/data?${params.toString()}`
 
     console.log(`url sent to backend: ${url}`)
 

@@ -27,7 +27,12 @@ func main() {
 
     h := handlers.NewHandler(cfg)
 
+    // API routes
     http.HandleFunc("/api/data", h.HandleSubmit)
+
+    // Serve static files from frontend folder
+    fs := http.FileServer(http.Dir("./frontend/"))
+    http.Handle("/", fs)
 
     port := os.Getenv("PORT")
     if port == "" {

@@ -56,7 +56,7 @@ async function handleClick(e) {
     paperElement.className = 'paper-card';
     paperElement.innerHTML = `
         <h3>${paper.title} 
-            <a href="url" target="_blank">${paper.url}</a>
+            <a href=${paper.url} target="_blank">${paper.url}</a>
         </h3>
         <p><strong>Abstract:</strong> ${paper.abstract}</p>
     `;

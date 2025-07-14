@@ -1,38 +1,52 @@
-from transformers import AutoTokenizer, AutoModel
-import torch
+import models
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
 
-# Load tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained("microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext")
-model = AutoModel.from_pretrained("microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext")
-print(f"Are tokenizer and model the same?: {tokenizer == model}")
+print("Starting main.py")
 
-# Sample abstracts
-abstracts = [
-    "Gene expression profiling can identify potential biomarkers for breast cancer.",
-    "CRISPR-Cas9 technology enables genome editing in a wide variety of organisms.",
-    "Machine learning models predict drug response from tumor genomic data."
-]
+reference_abstracts = [
+        "Mitochondrial dysfunction is a hallmark of Alzheimer's disease. Impaired mitochondrial biogenesis contributes to neurodegeneration.",
+        "Gene editing using CRISPR technology offers new therapeutic possibilities for genetic disorders."
+    ]
+target_abstracts = [
+        "The role of mitochondrial dysfunction in neurodegenerative diseases has been extensively studied. Recent research shows that mitochondrial biogenesis is impaired in Alzheimer's disease.",
+        "CRISPR-Cas9 gene editing technology has revolutionized molecular biology research. This study demonstrates its application in correcting genetic mutations.",
+        "Machine learning algorithms are increasingly being applied to drug discovery. Deep learning models can predict molecular properties with high accuracy.",
+        "The gut microbiome plays a crucial role in human health and disease. Dysbiosis has been linked to various metabolic disorders.",
+        "Immunotherapy has shown promising results in cancer treatment. Checkpoint inhibitors have improved survival rates in melanoma patients."
+    ]
 
-# Function to compute embeddings
-def get_embeddings(text_list):
-    embeddings = []
-    for text in text_list:
-        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
-        with torch.no_grad():
-            outputs = model(**inputs)
-            # Take the mean of the last hidden state
-            mean_embedding = outputs.last_hidden_state.mean(dim=1).squeeze()
-            embeddings.append(mean_embedding.numpy())
-    return np.array(embeddings)
+tokenizer, model = models.load_biobert_model()
+print("loaded tokenizer and model")
 
-# Generate embeddings from computed embeddings
-embeddings = get_embeddings(abstracts)
-print(f"embeddings returned from function: {embeddings}")
+# Use the same model for multiple operations
+ref_embeddings = models.get_biobert_embeddings(reference_abstracts, tokenizer=tokenizer, model=model)
+target_embeddings = models.get_biobert_embeddings(target_abstracts, tokenizer=tokenizer, model=model)
 
-# Cosine similarity matrix
-similarities = cosine_similarity(embeddings)
+print(f"length of ref_embeddings: {len(ref_embeddings)}")
+print(f"length of target_embeddings: {len(target_embeddings)}")
 
-print("Cosine Similarity Matrix:")
-print(similarities)
+# Compute similarities
+similarity_matrix = models.compute_similarity_matrix(target_embeddings, ref_embeddings)
+
+print("Similarity matrix shape:", similarity_matrix.shape)
+print("length of similarity matrix:", similarity_matrix)
+
+max_similarities = np.max(similarity_matrix, axis=1)
+# Create DataFrame
+data = []
+for i, abstract in enumerate(target_abstracts):
+    row = {
+        'target_index': i,
+        'abstract': abstract[:200] + '...' if len(abstract) > 200 else abstract,
+        'max_similarity': max_similarities[i]
+    }
+    
+    # Add similarity to each reference abstract
+    for j in range(len(reference_abstracts)):
+        row[f'ref_{j}_similarity'] = similarity_matrix[i, j]
+
+    data.append(row)
+
+df = pd.DataFrame(data)
+print("df:", df)

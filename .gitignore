@@ -3,4 +3,5 @@ backend/*.exe
 backend/*.out
 backend/*.test
 backend/backend
+models/__pycache__
 .env

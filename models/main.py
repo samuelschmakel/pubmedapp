@@ -1,8 +1,12 @@
+from fastapi import FastAPI
+import uvicorn
 import models
 import numpy as np
 import pandas as pd
 
 print("Starting main.py")
+
+app = FastAPI()
 
 reference_abstracts = [
         "Mitochondrial dysfunction is a hallmark of Alzheimer's disease. Impaired mitochondrial biogenesis contributes to neurodegeneration.",
@@ -29,24 +33,5 @@ print(f"length of target_embeddings: {len(target_embeddings)}")
 # Compute similarities
 similarity_matrix = models.compute_similarity_matrix(target_embeddings, ref_embeddings)
 
-print("Similarity matrix shape:", similarity_matrix.shape)
-print("length of similarity matrix:", similarity_matrix)
-
-max_similarities = np.max(similarity_matrix, axis=1)
-# Create DataFrame
-data = []
-for i, abstract in enumerate(target_abstracts):
-    row = {
-        'target_index': i,
-        'abstract': abstract[:200] + '...' if len(abstract) > 200 else abstract,
-        'max_similarity': max_similarities[i]
-    }
-    
-    # Add similarity to each reference abstract
-    for j in range(len(reference_abstracts)):
-        row[f'ref_{j}_similarity'] = similarity_matrix[i, j]
-
-    data.append(row)
-
-df = pd.DataFrame(data)
+df = models.create_dataframe(target_abstracts, similarity_matrix)
 print("df:", df)

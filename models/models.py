@@ -100,3 +100,38 @@ def compute_similarity_matrix(
         Similarity matrix of shape (n_targets, n_references)
     """
     return cosine_similarity(target_embeddings, reference_embeddings)
+
+def create_dataframe(
+    target_abstracts: list[str],
+    similarity_matrix: np.ndarray
+) -> pd.DataFrame:
+    """
+    Create pandas dataframe from target abstracts and cosine similarity matrix.
+
+    Args:
+        target_abstracts: List of target abstracts
+        similarity_matrix: numpy array of cosine similarity matrix between reference and target embeddings
+    """
+    row_averages = np.mean(similarity_matrix, axis=1)
+    max_similarities = np.max(similarity_matrix, axis=1)
+
+    data = []
+    for i, abstract in enumerate(target_abstracts):
+        row = {
+            'abstract': abstract[:200] + '...' if len(abstract) > 200 else abstract,
+            'avg_similarity': row_averages[i]
+            #'target_index': i,
+            #'max_similarity': max_similarities[i]
+        }
+
+        '''
+        # Add similarity to each reference abstract
+        for j in range(len(reference_abstracts)):
+            row[f'ref_{j}_similarity'] = similarity_matrix[i, j]
+        '''
+
+        data.append(row)
+
+    df = pd.DataFrame(data)
+    df = df.sort_values(by='avg_similarity', ascending=False)
+    return df

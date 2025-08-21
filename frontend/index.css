@@ -9,3 +9,76 @@ nav a {
 input {
     border-radius: 25px;
 }
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.tag-input-wrapper {
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    background: white;
+    cursor: text;
+    transition: border-color 0.3s;
+}
+
+.tag-input-wrapper:focus-within {
+    border-color: #007bff;
+    outline: none;
+}
+
+.tag {
+    background: #007bff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.tag-remove {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.tag-remove:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.tag-input {
+    border: none;
+    outline: none;
+    padding: 8px 4px;
+    font-size: 14px;
+    min-width: 150px;
+    flex: 1;
+}
+
+.tag-input::placeholder {
+    color: #999;
+}

@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync/atomic"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/samuelschmakel/pubmedapp/backend/config"
@@ -18,13 +16,7 @@ func main() {
     if err != nil {
         log.Println("No .env file found, using environment variables")
     }
-    cfg := &config.ApiConfig{
-        FileserverHits: atomic.Int32{},
-        HttpClient: &http.Client{
-            Timeout: 10 * time.Second,
-        },
-    }
-
+    cfg := config.CreateConfig()
     h := handlers.NewHandler(cfg)
 
     // API routes

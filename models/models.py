@@ -113,7 +113,7 @@ def create_dataframe(
         similarity_matrix: numpy array of cosine similarity matrix between reference and target embeddings
     """
     row_averages = np.mean(similarity_matrix, axis=1)
-    max_similarities = np.max(similarity_matrix, axis=1)
+    #max_similarities = np.max(similarity_matrix, axis=1)
 
     data = []
     for i, abstract in enumerate(target_abstracts):
@@ -134,4 +134,18 @@ def create_dataframe(
 
     df = pd.DataFrame(data)
     df = df.sort_values(by='avg_similarity', ascending=False)
+    return df
+
+def get_similarity_df(
+    reference_abstracts: List[str],
+    target_abstracts: List[str],
+) -> pd.DataFrame:
+    tokenizer, model = load_biobert_model()
+
+    ref_embeddings = get_biobert_embeddings(reference_abstracts, tokenizer=tokenizer, model=model)
+    target_embeddings = get_biobert_embeddings(target_abstracts, tokenizer=tokenizer, model=model)
+
+    similarity_matrix = compute_similarity_matrix(target_embeddings, ref_embeddings)
+
+    df = create_dataframe(target_abstracts, similarity_matrix)
     return df

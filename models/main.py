@@ -1,37 +1,44 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List
 import uvicorn
 import models
 import numpy as np
-import pandas as pd
+
+class ArticleInfo(BaseModel):
+    title: str
+    abstract: str
+    url: str
+
+class PythonAPIInput(BaseModel):
+    articleInfo: List[ArticleInfo]
+    context: List[str]
 
 print("Starting main.py")
 
 app = FastAPI()
 
-reference_abstracts = [
-        "Mitochondrial dysfunction is a hallmark of Alzheimer's disease. Impaired mitochondrial biogenesis contributes to neurodegeneration.",
-        "Gene editing using CRISPR technology offers new therapeutic possibilities for genetic disorders."
-    ]
-target_abstracts = [
-        "The role of mitochondrial dysfunction in neurodegenerative diseases has been extensively studied. Recent research shows that mitochondrial biogenesis is impaired in Alzheimer's disease.",
-        "CRISPR-Cas9 gene editing technology has revolutionized molecular biology research. This study demonstrates its application in correcting genetic mutations.",
-        "Machine learning algorithms are increasingly being applied to drug discovery. Deep learning models can predict molecular properties with high accuracy.",
-        "The gut microbiome plays a crucial role in human health and disease. Dysbiosis has been linked to various metabolic disorders.",
-        "Immunotherapy has shown promising results in cancer treatment. Checkpoint inhibitors have improved survival rates in melanoma patients."
-    ]
+@app.post("/process-list")
+async def process_list(input_data: PythonAPIInput):
+    print("in process_list")
+    reference_abstracts = input_data.context
+    target_abstracts = [item.abstract for item in input_data.articleInfo]
+    print(f'reference_abstracts: {reference_abstracts}')
+    print(f'target_abstracts: {target_abstracts}')
+    results = models.get_similarity_df(reference_abstracts, target_abstracts)
+    print(f'length of results: {len(results)}')
 
-tokenizer, model = models.load_biobert_model()
-print("loaded tokenizer and model")
+    # Transform DataFrame to a list, a format Go expects
+    dataframe_rows = []
 
-# Use the same model for multiple operations
-ref_embeddings = models.get_biobert_embeddings(reference_abstracts, tokenizer=tokenizer, model=model)
-target_embeddings = models.get_biobert_embeddings(target_abstracts, tokenizer=tokenizer, model=model)
+    for index, row in results.iterrows():
+        dataframe_rows.append({
+            "abstract": row['abstract'],
+            "similarity_score": float(row['avg_similarity'])  # Convert to native Python float
+        })
 
-print(f"length of ref_embeddings: {len(ref_embeddings)}")
-print(f"length of target_embeddings: {len(target_embeddings)}")
+    print(f"Transformed data: {dataframe_rows}")  # Debug output
+    return dataframe_rows  # Return array directly, not wrapped in an object
 
-# Compute similarities
-similarity_matrix = models.compute_similarity_matrix(target_embeddings, ref_embeddings)
-
-df = models.create_dataframe(target_abstracts, similarity_matrix)
-print("df:", df)
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8001)

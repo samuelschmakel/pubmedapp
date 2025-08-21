@@ -20,8 +20,15 @@
     <form id="myForm">
         <label for="query">Search:</label>
         <input name="query" id="query"><br><br>
-        <label for="context">Context:</label>
-        <input name="context" id="context"><br><br>
+        <div class="form-group">
+            <label for="context">Context:</label>
+            <div class="tag-input-wrapper" id="tagInputWrapper">
+                <input type="text" class="tag-input" id="tagInput" placeholder="Type and press Enter to add tags...">
+            </div>
+            <small style="color: #666; font-size: 12px;">
+                Type a string and press Enter or comma to add. Click × to remove.
+            </small>
+        </div>
         <label for="num_articles">Number of Articles</label>
         <input name="num_articles" id="num_articles" type="number"><br><br>
         <button type="submit">Submit</button>

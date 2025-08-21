@@ -1,15 +1,19 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"strings"
 
 	"github.com/samuelschmakel/pubmedapp/backend/config"
 	"github.com/samuelschmakel/pubmedapp/backend/processing"
 )
+
+// TODO: Call the Python HTTP API
 
 type Handler struct {
 	Cfg *config.ApiConfig
@@ -19,7 +23,30 @@ type ArticleInfo struct {
 	Title string `json:"title"`
 	Abstract string `json:"abstract"`
 	URL string `json:"url"`
+	Score float64 `json:"score"`
 }
+
+type DataFrameRow struct {
+	Abstract string `json:"abstract"`
+	SimilarityScore float64 `json:"similarity_score"`
+}
+
+type ArticlesSimilarity struct {
+	Articles string `json:"articles"`
+	Similarity float64 `json:"similarity"`
+}
+
+type PythonAPIInput struct {
+	ArticleInfo []ArticleInfo `json:"articleInfo"`
+	Context []string `json:"context"`
+}
+
+/*
+type Response struct {
+	Articles []ArticleInfo `json:"articles"`
+	DataFrame []DataFrameRow `json:"data_frame,omitempty"`
+}
+	*/
 
 func NewHandler(cfg *config.ApiConfig) *Handler {
 	return &Handler{Cfg: cfg}
@@ -38,10 +65,20 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
         return
     }
 
-    // TODO: Use these parameters in helper function to query dataset
     query := req.URL.Query().Get("query")
-    context := req.URL.Query().Get("context")
 	numArticles := req.URL.Query().Get("num_articles")
+	contextString := req.URL.Query().Get("context")
+	var context []string
+
+	if contextString != "" {
+		context = strings.Split(contextString, ",")
+		// Clean up whitespace if needed
+		for i, item := range context {
+			context[i] = strings.TrimSpace(item)
+		}
+	} else {
+		context = []string{} // empty slice if no context provided
+	}
 
 	// Verify that the query exists:
 	if query == "" {
@@ -86,11 +123,79 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
 		})
 	}
 
+	var pd_frame []DataFrameRow
+
+	// If context was provided, call the Python API to generate the scored pandas data frame
+	// Then, add it to articles
+	if len(context) != 0 {
+		input := PythonAPIInput{
+			ArticleInfo: articles,
+			Context: context,
+		}
+
+		pd_frame, err = h.callPythonAPI("/process-list", input)
+		fmt.Println("data frame: ", pd_frame)
+		if err != nil {
+			fmt.Println("error calling local Python API")
+			fmt.Printf("error: %v\n", err)
+			return
+		}
+		addArticleInfoScoreField(&articles, pd_frame)
+		sortArticles(&articles)
+	}
+
     w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(articles)
 	if err != nil {
 		http.Error(w, "Failed to encode articles", http.StatusInternalServerError)
 		return
 	}
-    //fmt.Fprint(w, `{"message": "Handling data, hello from Go backend!"}`)
+}
+
+func (h *Handler) callPythonAPI(endpoint string, data PythonAPIInput) ([]DataFrameRow, error) {
+	fmt.Println("calling Python API")
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal data: %w", err)
+	}
+
+	// TODO: use this to debug Python API. Also, test curl commands to test Python API
+	fmt.Printf("JSON payload being sent: %s\n", string(jsonData))
+
+	fmt.Printf("url sent to Python: %s\n", h.Cfg.PythonBaseURL+endpoint)
+	resp, err := h.Cfg.PythonClient.Post(
+		h.Cfg.PythonBaseURL+endpoint,
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error calling Python client: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("python service returned status: %d", resp.StatusCode)
+	}
+
+	var result []DataFrameRow
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	return result, err
+}
+
+func addArticleInfoScoreField(a *[]ArticleInfo, pd_frame []DataFrameRow) {
+	for i := range *a {
+		(*a)[i].Score = pd_frame[i].SimilarityScore
+	}
+}
+
+func sortArticles(a *[]ArticleInfo) {
+	slices.SortFunc(*a, func(a, b ArticleInfo) int {
+		if a.Score > b.Score {
+			return -1 // negative for descending
+		}
+		if a.Score < b.Score {
+			return 1
+		}
+		return 0
+	})
 }

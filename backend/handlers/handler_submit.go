@@ -179,7 +179,10 @@ func (h *Handler) callPythonAPI(endpoint string, data PythonAPIInput) ([]DataFra
 
 	var result []DataFrameRow
 	err = json.NewDecoder(resp.Body).Decode(&result)
-	return result, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+	return result, nil
 }
 
 func addArticleInfoScoreField(a *[]ArticleInfo, pd_frame []DataFrameRow) {

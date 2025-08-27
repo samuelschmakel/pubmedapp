@@ -1,11 +1,7 @@
-#!/bin/bash
-echo "Starting Python API with uv..."
-uv run python main.py &
-PYTHON_PID=$!
-echo "Python API started with PID: $PYTHON_PID"
+#! /bin/sh
+# Start Go backend
+./app &
 
-echo "Waiting for Python API to initialize..."
-sleep 10
-
-echo "Starting Go backend..."
-exec ./app
+# TODO: See if uv run python main.py is faster
+# Start Python API
+uvicorn main:app --host 0.0.0.0 --port 8001

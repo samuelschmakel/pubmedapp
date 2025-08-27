@@ -97,6 +97,7 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
 
 	eSearchResult, err := processing.FetchESearchResult(h.Cfg.HttpClient, query, numArticles)
 	if err != nil {
+		log.Printf("FetchESearchResult error: %v", err) // log full error
 		http.Error(w, "Error retrieving query UIDs from PubMed: "+err.Error(), http.StatusBadGateway)
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"slices"
 
@@ -53,6 +54,12 @@ func NewHandler(cfg *config.ApiConfig) *Handler {
 }
 
 func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
+	 defer func() {
+        if err := recover(); err != nil {
+            log.Printf("Handler panicked: %v", err)
+            http.Error(w, "Internal server error", http.StatusInternalServerError)
+        }
+    }()
 
     // CORS headers
     w.Header().Set("Access-Control-Allow-Origin", "*")

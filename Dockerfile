@@ -23,7 +23,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen
 
 # Copy Python files
-COPY main.py models.py ./
+COPY ./models/main.py ./models/models.py ./
 
 # Create and copy startup script
 COPY start.sh ./

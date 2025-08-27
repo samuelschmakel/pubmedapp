@@ -1,8 +1,11 @@
-# Start Python API in background (use python3, not python)
-python3 main.py &
+#!/bin/bash
+echo "Starting Python API with uv..."
+uv run python main.py &
+PYTHON_PID=$!
+echo "Python API started with PID: $PYTHON_PID"
 
-# Wait a moment for Python API to start
-sleep 5
+echo "Waiting for Python API to initialize..."
+sleep 10
 
-# Start Go application
-./app
+echo "Starting Go backend..."
+exec ./app

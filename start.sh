@@ -1,7 +1,8 @@
-#! /bin/sh
-# Start Go backend
-./app &
+#!/bin/sh
+set -e
 
-# TODO: See if uv run python main.py is faster
-# Start Python API
-uv run uvicorn main:app --host 0.0.0.0 --port 8001
+# Start Python API on localhost:8001 (internal only)
+uv run uvicorn main:app --host 127.0.0.1 --port 8001 &
+
+# Start Go backend on Render-assigned port ($PORT)
+./app --port ${PORT:-8080}

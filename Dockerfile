@@ -25,6 +25,9 @@ RUN uv sync --frozen
 # Copy Python source files
 COPY ./models/main.py ./models/models.py ./
 
+# Copy frontend files
+COPY frontend ./frontend
+
 # Create and copy startup script
 COPY start.sh ./
 RUN chmod +x start.sh

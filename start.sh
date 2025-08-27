@@ -1,7 +1,5 @@
-# Start Python API in background
-cd /opt/render/project/src # Render's project path
-python -m pip install -r requirements.txt
-python main.py &
+# Start Python API in background (use python3, not python)
+python3 main.py &
 
 # Wait a moment for Python API to start
 sleep 5

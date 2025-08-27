@@ -19,16 +19,12 @@ func main() {
     cfg := config.CreateConfig()
     h := handlers.NewHandler(cfg)
 
-    // API routes
-    http.HandleFunc("/api/data", h.HandleSubmit)
-
-    // Serve static files from frontend folder
-    fs := http.FileServer(http.Dir("./frontend/"))
-    http.Handle("/", fs)
+    http.Handle("/api/", http.HandlerFunc(h.HandleSubmit))       // API routes
+    http.Handle("/", http.FileServer(http.Dir("./frontend/")))   // Frontend
 
     port := os.Getenv("PORT")
     if port == "" {
-        port = "8080"
+        port = "8080"  // default for local dev
     }
 
     // Run server on port (8080 by default)

@@ -154,9 +154,11 @@ func (h *Handler) HandleSubmit(w http.ResponseWriter, req *http.Request) {
     w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(articles)
 	if err != nil {
+		log.Printf("Error encoding JSON: %v", err)
 		http.Error(w, "Failed to encode articles", http.StatusInternalServerError)
 		return
 	}
+	log.Printf("Successfully returned %d articles", len(articles))
 }
 
 func (h *Handler) callPythonAPI(endpoint string, data PythonAPIInput) ([]DataFrameRow, error) {

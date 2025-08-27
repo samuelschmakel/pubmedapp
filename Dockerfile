@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 RUN go build -o app ./backend
 
-# Final stage with Python + Go binary
+# ---------- Final stage with Python + Go binary ----------
 FROM python:3.11-slim
 WORKDIR /app
 

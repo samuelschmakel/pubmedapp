@@ -2,6 +2,7 @@ package config
 
 import (
 	"net/http"
+	"os"
 	"sync/atomic"
 	"time"
 )
@@ -24,6 +25,6 @@ func CreateConfig() *ApiConfig {
         PythonClient: &http.Client{
             Timeout: 10 * time.Second,
         },
-        PythonBaseURL: "http://127.0.0.1:8001",
+        PythonBaseURL: os.Getenv("PYTHON_BASE_URL"),
     }
 }

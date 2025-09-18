@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List
 import uvicorn
 import models
+import os
 import numpy as np
 
 class ArticleInfo(BaseModel):
@@ -41,4 +42,5 @@ async def process_list(input_data: PythonAPIInput):
     return dataframe_rows  # Return array directly, not wrapped in an object
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    port = int(os.environ.get("PORT", 8001))
+    uvicorn.run(app, host="0.0.0.0", port=port)

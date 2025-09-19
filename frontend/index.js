@@ -43,6 +43,7 @@ async function handleSubmit(e) {
     } else {
         // Running on Render or localhost:8080
         baseUrl = window.location.origin;
+        print(`baseUrl is: ${baseUrl}`)
     }
 
     let url = `${baseUrl}/api/data?${params.toString()}`

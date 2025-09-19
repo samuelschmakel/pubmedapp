@@ -42,8 +42,7 @@ async function handleSubmit(e) {
         baseUrl = 'http://localhost:8080';
     } else {
         // Running on Render or localhost:8080
-        baseUrl = window.location.origin;
-        print(`baseUrl is: ${baseUrl}`)
+        baseUrl = "https://pubmedapp-backend.onrender.com";
     }
 
     let url = `${baseUrl}/api/data?${params.toString()}`
